@@ -34,22 +34,26 @@ form.addEventListener('submit', function(event) {
   emailInput.value = '';
   phoneInput.value = '';
 
-  // Display the saved data with a delete button
+  // Display the saved data with delete and edit buttons
   displaySavedData(formData);
 });
 
-// Function to display saved data with delete button
+// Function to display saved data with delete and edit buttons
 function displaySavedData(formData) {
   // Create a new <div> element to display the data
   const dataDiv = document.createElement('div');
 
   // Create a <span> element to show the data
   const dataSpan = document.createElement('span');
-  dataSpan.textContent = JSON.stringify(formData);
+  dataSpan.textContent = `Name: ${formData.name}, Email: ${formData.email}, Phone: ${formData.phone}`;
 
   // Create a delete button
   const deleteButton = document.createElement('button');
   deleteButton.textContent = 'Delete';
+
+  // Create an edit button
+  const editButton = document.createElement('button');
+  editButton.textContent = 'Edit';
 
   // Add event listener to the delete button
   deleteButton.addEventListener('click', function() {
@@ -60,9 +64,17 @@ function displaySavedData(formData) {
     savedDataDiv.removeChild(dataDiv);
   });
 
-  // Append the data and delete button to the new <div> element
+  // Add event listener to the edit button
+  editButton.addEventListener('click', function() {
+    // Enable editing of the email field
+    const emailInput = document.getElementById('email');
+    emailInput.disabled = false;
+  });
+
+  // Append the data, delete button, and edit button to the new <div> element
   dataDiv.appendChild(dataSpan);
   dataDiv.appendChild(deleteButton);
+  dataDiv.appendChild(editButton);
 
   // Append the new <div> element to the savedDataDiv
   savedDataDiv.appendChild(dataDiv);
@@ -74,5 +86,11 @@ window.addEventListener('load', function() {
   if (storedData) {
     const formData = JSON.parse(storedData);
     displaySavedData(formData);
+
+    // Enable editing of the email field if it was previously edited
+    const emailInput = document.getElementById('email');
+    if (formData.email !== emailInput.defaultValue) {
+      emailInput.disabled = false;
+    }
   }
 });
