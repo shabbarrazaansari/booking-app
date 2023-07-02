@@ -1,5 +1,3 @@
-// app.js
-
 // Retrieve the form element and the area to display saved data
 const form = document.getElementById('myForm');
 const savedDataDiv = document.getElementById('savedData');
@@ -36,6 +34,45 @@ form.addEventListener('submit', function(event) {
   emailInput.value = '';
   phoneInput.value = '';
 
-  // Display the saved data
-  savedDataDiv.textContent = jsonData;
+  // Display the saved data with a delete button
+  displaySavedData(formData);
+});
+
+// Function to display saved data with delete button
+function displaySavedData(formData) {
+  // Create a new <div> element to display the data
+  const dataDiv = document.createElement('div');
+
+  // Create a <span> element to show the data
+  const dataSpan = document.createElement('span');
+  dataSpan.textContent = JSON.stringify(formData);
+
+  // Create a delete button
+  const deleteButton = document.createElement('button');
+  deleteButton.textContent = 'Delete';
+
+  // Add event listener to the delete button
+  deleteButton.addEventListener('click', function() {
+    // Remove the saved data from local storage
+    localStorage.removeItem('formData');
+
+    // Remove the displayed data from the screen
+    savedDataDiv.removeChild(dataDiv);
+  });
+
+  // Append the data and delete button to the new <div> element
+  dataDiv.appendChild(dataSpan);
+  dataDiv.appendChild(deleteButton);
+
+  // Append the new <div> element to the savedDataDiv
+  savedDataDiv.appendChild(dataDiv);
+}
+
+// Check if there is any saved data on page load
+window.addEventListener('load', function() {
+  const storedData = localStorage.getItem('formData');
+  if (storedData) {
+    const formData = JSON.parse(storedData);
+    displaySavedData(formData);
+  }
 });
