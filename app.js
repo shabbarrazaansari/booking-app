@@ -2,6 +2,9 @@
 const form = document.getElementById('myForm');
 const savedDataDiv = document.getElementById('savedData');
 
+// API Base URL
+const apiUrl = 'https://crudcrud.com/api/c796ed88951241a7a35df0cd43920fc1';
+
 // Add submit event listener to the form
 form.addEventListener('submit', function(event) {
   event.preventDefault(); // Prevent the default form submission
@@ -23,22 +26,25 @@ form.addEventListener('submit', function(event) {
     phone: phone
   };
 
-  // Convert the object to a JSON string
-  const jsonData = JSON.stringify(formData);
+  // Save the data to the API using Axios
+  axios.post(`${apiUrl}/appontment`, formData)
+    .then(response => {
+      console.log('Data sent successfully:', response.data);
 
-  // Save the JSON string in local storage
-  localStorage.setItem('formData', jsonData);
+      // Clear the form inputs
+      nameInput.value = '';
+      emailInput.value = '';
+      phoneInput.value = '';
 
-  // Clear the form inputs
-  nameInput.value = '';
-  emailInput.value = '';
-  phoneInput.value = '';
-
-  // Display the saved data with delete and edit buttons
-  displaySavedData(formData);
+      // Display the saved data with delete button
+      displaySavedData(formData);
+    })
+    .catch(error => {
+      console.error('Error sending data:', error);
+    });
 });
 
-// Function to display saved data with delete and edit buttons
+// Function to display saved data with delete button
 function displaySavedData(formData) {
   // Create a new <div> element to display the data
   const dataDiv = document.createElement('div');
@@ -51,30 +57,15 @@ function displaySavedData(formData) {
   const deleteButton = document.createElement('button');
   deleteButton.textContent = 'Delete';
 
-  // Create an edit button
-  const editButton = document.createElement('button');
-  editButton.textContent = 'Edit';
-
   // Add event listener to the delete button
   deleteButton.addEventListener('click', function() {
-    // Remove the saved data from local storage
-    localStorage.removeItem('formData');
-
     // Remove the displayed data from the screen
     savedDataDiv.removeChild(dataDiv);
   });
 
-  // Add event listener to the edit button
-  editButton.addEventListener('click', function() {
-    // Enable editing of the email field
-    const emailInput = document.getElementById('email');
-    emailInput.disabled = false;
-  });
-
-  // Append the data, delete button, and edit button to the new <div> element
+  // Append the data and delete button to the new <div> element
   dataDiv.appendChild(dataSpan);
   dataDiv.appendChild(deleteButton);
-  dataDiv.appendChild(editButton);
 
   // Append the new <div> element to the savedDataDiv
   savedDataDiv.appendChild(dataDiv);
@@ -86,11 +77,5 @@ window.addEventListener('load', function() {
   if (storedData) {
     const formData = JSON.parse(storedData);
     displaySavedData(formData);
-
-    // Enable editing of the email field if it was previously edited
-    const emailInput = document.getElementById('email');
-    if (formData.email !== emailInput.defaultValue) {
-      emailInput.disabled = false;
-    }
   }
 });
