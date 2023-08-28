@@ -1,47 +1,70 @@
 // Retrieve the form element and the area to display saved data
 const form = document.getElementById('myForm');
 const savedDataDiv = document.getElementById('savedData');
+const nameInput = document.getElementById('name');
+const emailInput = document.getElementById('email');
+const phoneInput = document.getElementById('phone');
 
 // API Base URL
 const apiUrl = 'https://crudcrud.com/api/c796ed88951241a7a35df0cd43920fc1';
+
+// Keep track of the edited user's ID
+let editedUserId = null;
 
 // Add submit event listener to the form
 form.addEventListener('submit', function(event) {
   event.preventDefault(); // Prevent the default form submission
 
-  // Retrieve the form inputs
-  const nameInput = document.getElementById('name');
-  const emailInput = document.getElementById('email');
-  const phoneInput = document.getElementById('phone');
-
-  // Get the values from the form inputs
   const name = nameInput.value;
   const email = emailInput.value;
   const phone = phoneInput.value;
 
-  // Create an object with the form values
-  const formData = {
-    name: name,
-    email: email,
-    phone: phone
-  };
+  // If we have an editedUserId, update the user detail
+  if (editedUserId) {
+    const editedData = {
+      name: name,
+      email: email,
+      phone: phone
+    };
 
-  // Save the data to the API using Axios
-  axios.post(`${apiUrl}/appontment`, formData)
-    .then(response => {
-      console.log('Data sent successfully:', response.data);
+    // Update the user detail using Axios
+    axios.put(`${apiUrl}/appontment/${editedUserId}`, editedData)
+      .then(response => {
+        console.log('Data updated successfully:', response.data);
+        // Clear the editedUserId after successful update
+        editedUserId = null;
+        // Fetch and display updated data from the API
+        fetchAndDisplayData();
+        // Clear the form inputs
+        nameInput.value = '';
+        emailInput.value = '';
+        phoneInput.value = '';
+      })
+      .catch(error => {
+        console.error('Error updating data:', error);
+      });
+  } else {
+    const formData = {
+      name: name,
+      email: email,
+      phone: phone
+    };
 
-      // Clear the form inputs
-      nameInput.value = '';
-      emailInput.value = '';
-      phoneInput.value = '';
-
-      // Fetch and display updated data from the API
-      fetchAndDisplayData();
-    })
-    .catch(error => {
-      console.error('Error sending data:', error);
-    });
+    // Save the data to the API using Axios
+    axios.post(`${apiUrl}/appontment`, formData)
+      .then(response => {
+        console.log('Data sent successfully:', response.data);
+        // Clear the form inputs
+        nameInput.value = '';
+        emailInput.value = '';
+        phoneInput.value = '';
+        // Fetch and display updated data from the API
+        fetchAndDisplayData();
+      })
+      .catch(error => {
+        console.error('Error sending data:', error);
+      });
+  }
 });
 
 // Function to fetch and display data from the API
@@ -64,42 +87,38 @@ function fetchAndDisplayData() {
     });
 }
 
-// Function to display saved data with delete and edit buttons
+// Function to display saved data with delete, edit buttons, and edit icon
 function displaySavedData(formData) {
-  // Create a new <div> element to display the data
   const dataDiv = document.createElement('div');
-
-  // Create a <span> element to show the data
   const dataSpan = document.createElement('span');
   dataSpan.textContent = `Name: ${formData.name}, Email: ${formData.email}, Phone: ${formData.phone}`;
+  
+  // Create an edit button
+  const editButton = document.createElement('button');
+  editButton.textContent = 'Edit';
+  editButton.addEventListener('click', function() {
+    // Populate the main form with user details for editing
+    nameInput.value = formData.name;
+    emailInput.value = formData.email;
+    phoneInput.value = formData.phone;
+    // Set the editedUserId for updating the correct user
+    editedUserId = formData._id;
+  });
 
   // Create a delete button
   const deleteButton = document.createElement('button');
   deleteButton.textContent = 'Delete';
-  
-  // Add event listener to the delete button
   deleteButton.addEventListener('click', function() {
     // Delete the data from the API using Axios
     axios.delete(`${apiUrl}/appontment/${formData._id}`)
       .then(response => {
         console.log('Data deleted successfully:', response.data);
-        // Remove the displayed data from the screen
-        savedDataDiv.removeChild(dataDiv);
+        // Fetch and display updated data from the API
+        fetchAndDisplayData();
       })
       .catch(error => {
         console.error('Error deleting data:', error);
       });
-  });
-
-  // Create an edit button
-  const editButton = document.createElement('button');
-  editButton.textContent = 'Edit';
-
-  // Add event listener to the edit button
-  editButton.addEventListener('click', function() {
-    // Enable editing of the email field
-    const emailInput = document.getElementById('email');
-    emailInput.disabled = false;
   });
 
   // Create a delete icon
@@ -110,18 +129,18 @@ function displaySavedData(formData) {
     axios.delete(`${apiUrl}/appontment/${formData._id}`)
       .then(response => {
         console.log('Data deleted successfully:', response.data);
-        // Remove the displayed data from the screen
-        savedDataDiv.removeChild(dataDiv);
+        // Fetch and display updated data from the API
+        fetchAndDisplayData();
       })
       .catch(error => {
         console.error('Error deleting data:', error);
       });
   });
 
-  // Append the data, delete button, edit button, and delete icon to the new <div> element
+  // Append the data, edit button, delete button, and delete icon to the new <div> element
   dataDiv.appendChild(dataSpan);
-  dataDiv.appendChild(deleteButton);
   dataDiv.appendChild(editButton);
+  dataDiv.appendChild(deleteButton);
   dataDiv.appendChild(deleteIcon);
 
   // Append the new <div> element to the savedDataDiv
