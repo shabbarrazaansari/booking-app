@@ -76,16 +76,24 @@ function displaySavedData(formData) {
   // Create a delete button
   const deleteButton = document.createElement('button');
   deleteButton.textContent = 'Delete';
+  
+  // Add event listener to the delete button
+  deleteButton.addEventListener('click', function() {
+    // Delete the data from the API using Axios
+    axios.delete(`${apiUrl}/appontment/${formData._id}`)
+      .then(response => {
+        console.log('Data deleted successfully:', response.data);
+        // Remove the displayed data from the screen
+        savedDataDiv.removeChild(dataDiv);
+      })
+      .catch(error => {
+        console.error('Error deleting data:', error);
+      });
+  });
 
   // Create an edit button
   const editButton = document.createElement('button');
   editButton.textContent = 'Edit';
-
-  // Add event listener to the delete button
-  deleteButton.addEventListener('click', function() {
-    // Remove the displayed data from the screen
-    savedDataDiv.removeChild(dataDiv);
-  });
 
   // Add event listener to the edit button
   editButton.addEventListener('click', function() {
@@ -94,10 +102,27 @@ function displaySavedData(formData) {
     emailInput.disabled = false;
   });
 
-  // Append the data, delete button, and edit button to the new <div> element
+  // Create a delete icon
+  const deleteIcon = document.createElement('i');
+  deleteIcon.className = 'fas fa-trash-alt delete-icon';
+  deleteIcon.addEventListener('click', function() {
+    // Delete the data from the API using Axios
+    axios.delete(`${apiUrl}/appontment/${formData._id}`)
+      .then(response => {
+        console.log('Data deleted successfully:', response.data);
+        // Remove the displayed data from the screen
+        savedDataDiv.removeChild(dataDiv);
+      })
+      .catch(error => {
+        console.error('Error deleting data:', error);
+      });
+  });
+
+  // Append the data, delete button, edit button, and delete icon to the new <div> element
   dataDiv.appendChild(dataSpan);
   dataDiv.appendChild(deleteButton);
   dataDiv.appendChild(editButton);
+  dataDiv.appendChild(deleteIcon);
 
   // Append the new <div> element to the savedDataDiv
   savedDataDiv.appendChild(dataDiv);
