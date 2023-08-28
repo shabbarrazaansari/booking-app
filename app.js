@@ -36,15 +36,35 @@ form.addEventListener('submit', function(event) {
       emailInput.value = '';
       phoneInput.value = '';
 
-      // Display the saved data with delete button
-      displaySavedData(formData);
+      // Fetch and display updated data from the API
+      fetchAndDisplayData();
     })
     .catch(error => {
       console.error('Error sending data:', error);
     });
 });
 
-// Function to display saved data with delete button
+// Function to fetch and display data from the API
+function fetchAndDisplayData() {
+  // Make a GET request to the API using Axios
+  axios.get(`${apiUrl}/appontment`)
+    .then(response => {
+      const appointments = response.data; // Assuming the API returns an array of appointments
+
+      // Clear the existing data from the screen
+      savedDataDiv.innerHTML = '';
+
+      // Display each appointment
+      appointments.forEach(appointment => {
+        displaySavedData(appointment);
+      });
+    })
+    .catch(error => {
+      console.error('Error fetching data:', error);
+    });
+}
+
+// Function to display saved data with delete and edit buttons
 function displaySavedData(formData) {
   // Create a new <div> element to display the data
   const dataDiv = document.createElement('div');
@@ -57,25 +77,33 @@ function displaySavedData(formData) {
   const deleteButton = document.createElement('button');
   deleteButton.textContent = 'Delete';
 
+  // Create an edit button
+  const editButton = document.createElement('button');
+  editButton.textContent = 'Edit';
+
   // Add event listener to the delete button
   deleteButton.addEventListener('click', function() {
     // Remove the displayed data from the screen
     savedDataDiv.removeChild(dataDiv);
   });
 
-  // Append the data and delete button to the new <div> element
+  // Add event listener to the edit button
+  editButton.addEventListener('click', function() {
+    // Enable editing of the email field
+    const emailInput = document.getElementById('email');
+    emailInput.disabled = false;
+  });
+
+  // Append the data, delete button, and edit button to the new <div> element
   dataDiv.appendChild(dataSpan);
   dataDiv.appendChild(deleteButton);
+  dataDiv.appendChild(editButton);
 
   // Append the new <div> element to the savedDataDiv
   savedDataDiv.appendChild(dataDiv);
 }
 
-// Check if there is any saved data on page load
+// Load and display data on page load
 window.addEventListener('load', function() {
-  const storedData = localStorage.getItem('formData');
-  if (storedData) {
-    const formData = JSON.parse(storedData);
-    displaySavedData(formData);
-  }
+  fetchAndDisplayData();
 });
